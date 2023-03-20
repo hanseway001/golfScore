@@ -8,6 +8,7 @@
 //         //   return response
 // }
 let courses = []
+let players = []
 
 let lehi = 'http://uxcobra.com/golfapi/course11819.txt'
 let aF = 'http://uxcobra.com/golfapi/course18300.txt'
@@ -18,7 +19,7 @@ function displayCourseSelection() {
     let courseOptionsHtml = '';
 
     courses.forEach((course) => {
-        courseOptionsHtml = `<option value="${course.data.id}">${course.data.name}</option>`;
+        courseOptionsHtml = `<option value="${course.id}">${course.name}</option>`;
     });
  
     displayElement.innerHTML += courseOptionsHtml
@@ -60,41 +61,93 @@ function addUserInput() {
 //     document.getElementById('tee-box-select').innerHTML = teeBoxSelectHtml;
 // }
 
-
 function displayScoreCard() {
     //hide course and user creation
+    const element = document.querySelector('#options-container').classList
+    element.toggle('hidden')
 
-    //make score cards
-    let card = document.querySelector('.scoreCardOut')
-    let holesHtml = `
-        <tr>
-            <td>Hole</td>
-            <td>1</td>
-            <td>2</td>
-            <td>3</td>
-            <td>4</td>
-            <td>5</td>
-            <td>6</td>
-            <td>7</td>
-            <td>8</td>
-            <td>9</td>
-            <td>Out</td>
-        </tr> 
-        `;
-        let yardageHtml = ''
-        let parsHtml = ''
-        let handyCapsHtml = ''
+    //for each player create a scorecard front9
+    players.forEach(player => {
+        const { name, teeBox } = player
+        //make score cards tables for each player
+        //add out table
+        //add in table
+        addTables(name)
 
-    courses[0].data.holes.forEach((hole) => {
-        yardageHtml = `
-            <tr>
-                <td>$ho</td>
-            </tr>    
-            `;
-    });
+        addTeaboxYardage(0 , teeBox, name)
+        //render Par
+        // addPars()
+        //render Handicap
+        // addHandicap()
+        //render userName and userScore
+        // addScore(name)
+    })
+
+}
 
 
-    card.innerHTML += holesHtml + yardageHtml + parsHtml + handyCapsHtml
+
+function addTeaboxYardage (course, teeBox, playerName) {
+    
+    const scoreCard = document.querySelector('.scoreCard')
+
+    const scoreOut = document.getElementById(playerName+"out")
+    // const scoreIn = scoreCard.children.getElementById('playerName+"in"') 
+    
+    let holesRow = '<tr><td>Hole</td>'
+    let yardRow = '<tr><td>Yards</td>'
+    let hcpRow = '<tr><td>HCP</td>'
+    let parRow = '<tr><td>Par</td>'
+    let playerRow = `<tr><td> ${playerName}</td>`
+
+    courses[course].holes.forEach((obj) => {
+        let courseTeeBoxes = obj.teeBoxes.find(teeBoxItem => teeBoxItem.teeType === teeBox)
+        let holeNum = obj.hole
+        const yards = courseTeeBoxes.yards
+        const hcp = courseTeeBoxes.hcp
+        const par = courseTeeBoxes.par
+
+        console.log('hole '+ holeNum + ' yards ' + yards + ' hcp ' + hcp + ' par ' + par)
+
+        holesRow += `<td>`+ holeNum +`</td>`
+        yardRow += `<td> ${yards}</td>`
+        hcpRow += `<td> ${hcp}</td>`
+        parRow += `<td> ${par}</td>`
+        playerRow += `<td> <input type="number" class="input" id="${holeNum}" onchange="onchangeScore(event)" min="1" max="10" size="2" maxLength="2"></td>`
+
+    })
+    holesRow += '</tr>'
+    yardRow += '</tr>'
+    hcpRow += '</tr>'
+    parRow += '</tr>'
+    playerRow += '</tr>'
+    scoreCard.innerHTML = holesRow + yardRow + hcpRow + parRow + playerRow
+    // parentEle.prepend(teeBoxYardage)
+   
+    
+}
+
+function onchangeScore(event) {
+    const inputScore = Number(event.target.value)
+    console.log(inputScore)
+}
+function addTables(name) {
+    const scorecardElement = document.getElementById("scorecard")
+    let newinnerHTML = ''
+    newinnerHTML = `
+        <div class="table-responsive">
+            <table id="${name}+out" class="table table-bordered scoreCard">
+            </table>    
+        </div>
+        <div class="table-responsive">
+            <table id="${name}+in" class="table table-bordered scoreCard">
+            </table>    
+        </div>
+    `
+    scorecardElement.innerHTML += newinnerHTML  
+}
+
+function addScore() {
 
 }
 
@@ -103,15 +156,16 @@ function handleAddNewUser() {
     let userNameInput = document.querySelector('#userName').value
     let teeBoxInput = document.querySelector('#teeBoxSelection').value
 
-    // console.log(userNameInput + ' teebox ' + teeBoxInput )
-    //testing need to get username and teebox variables
+    // create new player
     let player = new Player(userNameInput, teeBoxInput)
+    players.push(player)
+    
     console.log(JSON.stringify(player))
 
-      //clear input box
-      document.querySelector('#userName').value = ''
+    //clear input box
+    document.querySelector('#userName').value = ''
 
-          // reset teebox selection to default
+    // reset teebox selection to default
     var options = document.querySelectorAll('#teeBoxSelection option');
     for (var i = 0, l = options.length; i < l; i++) {
         options[i].selected = options[i].defaultSelected;
@@ -136,15 +190,15 @@ async function getAvailableCourses(course) {
     if (!response.ok) {
         throw new Error(`HTTP error: ${response.status}`);
       }
-      const data = await response.json();
-      return data;
+      const courseResponse = await response.json();
+      return courseResponse;
 }
 
 function getAllCourses(course) {
     let responseJson = getAvailableCourses(course)
     responseJson.then((courseInfo) => {
         // console.log(courseInfo.data.id)
-        courses.push(courseInfo)
+        courses.push(courseInfo.data)
         displayCourseSelection()
     })
 }
