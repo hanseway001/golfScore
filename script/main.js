@@ -92,7 +92,7 @@ function addTeaboxYardage (course, teeBox, playerName) {
     const scoreCard = document.querySelector('.scoreCard')
 
     const scoreOut = document.getElementById(playerName+"out")
-    // const scoreIn = scoreCard.children.getElementById('playerName+"in"') 
+    const scoreIn = document.getElementById(playerName+"in") 
     
     let holesRow = '<tr><td>Hole</td>'
     let yardRow = '<tr><td>Yards</td>'
@@ -113,7 +113,7 @@ function addTeaboxYardage (course, teeBox, playerName) {
         yardRow += `<td> ${yards}</td>`
         hcpRow += `<td> ${hcp}</td>`
         parRow += `<td> ${par}</td>`
-        playerRow += `<td> <input type="number" class="input" id="${holeNum}" onchange="onchangeScore(event)" min="1" max="10" size="2" maxLength="2"></td>`
+        playerRow += `<td> <input type="number" class="input" id="${holeNum}" onchange="onchangeScore(event, '${playerName}', ${holeNum})" min="1" max="10" size="2" maxLength="2"></td>`
 
     })
     holesRow += '</tr>'
@@ -127,10 +127,15 @@ function addTeaboxYardage (course, teeBox, playerName) {
     
 }
 
-function onchangeScore(event) {
+function onchangeScore(event, playerName, holeNum) {
     const inputScore = Number(event.target.value)
-    console.log(inputScore)
+    //add score to players object
+    const index = players.map(e => e.name).indexOf(playerName)
+    players[index].scores.splice(holeNum-1, 0, inputScore)
+
+    // console.log(inputScore)
 }
+
 function addTables(name) {
     const scorecardElement = document.getElementById("scorecard")
     let newinnerHTML = ''
