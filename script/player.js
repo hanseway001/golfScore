@@ -3,7 +3,7 @@ class Player {
       this.name = name
       this.id = this.getNextId(5)
       this.teeBox = teeBox
-      this.scores = []
+      this.scores = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     }
     
     

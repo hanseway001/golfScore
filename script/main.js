@@ -9,6 +9,7 @@
 // }
 let courses = []
 let players = []
+let total = 0
 
 let lehi = 'http://uxcobra.com/golfapi/course11819.txt'
 let aF = 'http://uxcobra.com/golfapi/course18300.txt'
@@ -99,6 +100,7 @@ function addTeaboxYardage (course, teeBox, playerName) {
     let hcpRow = '<tr><td>HCP</td>'
     let parRow = '<tr><td>Par</td>'
     let playerRow = `<tr><td> ${playerName}</td>`
+    let totalScore = `<tr><td>Total Score</td>`
 
     courses[course].holes.forEach((obj) => {
         let courseTeeBoxes = obj.teeBoxes.find(teeBoxItem => teeBoxItem.teeType === teeBox)
@@ -114,15 +116,33 @@ function addTeaboxYardage (course, teeBox, playerName) {
         hcpRow += `<td> ${hcp}</td>`
         parRow += `<td> ${par}</td>`
         playerRow += `<td> <input type="number" class="input" id="${holeNum}" onchange="onchangeScore(event, '${playerName}', ${holeNum})" min="1" max="10" size="2" maxLength="2"></td>`
+        
+        if(holeNum === 9) {
+            holesRow += '<td>Out</td></tr>'
+            yardRow += '<td></td></tr>'
+            hcpRow += '<td></td></tr>'
+            parRow += '<td></td></tr>'
+            playerRow += `<td id="${playerName}outScore">0</td></tr>`
+            scoreOut.innerHTML = holesRow + yardRow + hcpRow + parRow + playerRow
 
+            holesRow = '<tr><td>Hole</td>'
+            yardRow = '<tr><td>Yards</td>'
+            hcpRow = '<tr><td>HCP</td>'
+            parRow = '<tr><td>Par</td>'
+            playerRow = `<tr><td> ${playerName}</td>`
+        } else if(holeNum === 18) {
+            holesRow += '<td></td></tr>'
+            yardRow += '<td></td></tr>'
+            hcpRow += '<td></td></tr>'
+            parRow += '<td></td></tr>'
+            playerRow += `<td id="${playerName}inScore">0</td></tr>`
+            // total = totalScore(playerName)
+            totalScore += `<td id="${playerName}totalScore">0</td></tr>`
+
+            scoreIn.innerHTML = holesRow + yardRow + hcpRow + parRow + playerRow + totalScore
+        }
     })
-    holesRow += '</tr>'
-    yardRow += '</tr>'
-    hcpRow += '</tr>'
-    parRow += '</tr>'
-    playerRow += '</tr>'
-    scoreCard.innerHTML = holesRow + yardRow + hcpRow + parRow + playerRow
-    // parentEle.prepend(teeBoxYardage)
+
    
     
 }
@@ -132,28 +152,47 @@ function onchangeScore(event, playerName, holeNum) {
     //add score to players object
     const index = players.map(e => e.name).indexOf(playerName)
     players[index].scores.splice(holeNum-1, 0, inputScore)
-
-    // console.log(inputScore)
+    totalScore(playerName)
 }
 
 function addTables(name) {
-    const scorecardElement = document.getElementById("scorecard")
+    const scorecardElement = document.getElementById("scorecards")
     let newinnerHTML = ''
     newinnerHTML = `
         <div class="table-responsive">
-            <table id="${name}+out" class="table table-bordered scoreCard">
+            <table id="${name}out" class="table table-bordered scoreCard">
             </table>    
         </div>
         <div class="table-responsive">
-            <table id="${name}+in" class="table table-bordered scoreCard">
+            <table id="${name}in" class="table table-bordered scoreCard">
             </table>    
         </div>
     `
     scorecardElement.innerHTML += newinnerHTML  
 }
 
-function addScore() {
+function totalScore(playerName) {
+    //get the score display elemnts
+    const totalScoreElement = document.getElementById(`${playerName}totalScore`)
+    const outScoreElement = document.getElementById(`${playerName}outScore`)
+    const inScoreElement = document.getElementById(`${playerName}inScore`)
 
+    const userIndex = players.map(e =>e.name).indexOf(playerName)
+    let total = 0
+    let outScore = 0
+    let inScore = 0
+    players[userIndex].scores.forEach((score, index) => {
+        if(index < 9) {
+            outScore += score
+        } else if(index >= 9) {
+            inScore += score
+        }
+    })
+    total = outScore + inScore
+    
+    totalScoreElement.innerHTML = total
+    outScoreElement.innerHTML = outScore
+    inScoreElement.innerHTML = inScore
 }
 
 function handleAddNewUser() {
