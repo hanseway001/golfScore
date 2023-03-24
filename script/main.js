@@ -43,24 +43,13 @@ function addUserInput() {
                 <option value="men">Men</option>
                 <option value="women">Women</option>
             </select>
-            <button class="form-control" onclick="handleAddNewUser()">Add User</button>
-            <button class="form-control" onclick="displayScoreCard()">Start Game</button>
+            <button class="form-control mt-3 " onclick="handleAddNewUser()">Add User</button>
+            <button class="form-control mt-3" onclick="displayScoreCard()">Start Game</button>
         </div>    
     `
 
     displayElement.innerHTML += userOptionsHtml
 }
-
-// function displayCourseInfo() {
-//     let teeBoxSelectHtml = ''
-//     teeBoxes.forEach(function (teeBox, index) {
-//         teeBoxSelectHtml += `<option value="${index}">${teeBox.teeType.toUpperCase()}, ${
-//         teeBox.totalYards
-//     } yards</option>`
-//     });
-
-//     document.getElementById('tee-box-select').innerHTML = teeBoxSelectHtml;
-// }
 
 function displayScoreCard() {
     //hide course and user creation
@@ -71,22 +60,12 @@ function displayScoreCard() {
     players.forEach(player => {
         const { name, teeBox } = player
         //make score cards tables for each player
-        //add out table
-        //add in table
         addTables(name)
-
+        //add out and in table info
         addTeaboxYardage(0 , teeBox, name)
-        //render Par
-        // addPars()
-        //render Handicap
-        // addHandicap()
-        //render userName and userScore
-        // addScore(name)
     })
 
 }
-
-
 
 function addTeaboxYardage (course, teeBox, playerName) {
     
@@ -94,6 +73,13 @@ function addTeaboxYardage (course, teeBox, playerName) {
 
     const scoreOut = document.getElementById(playerName+"out")
     const scoreIn = document.getElementById(playerName+"in") 
+
+    let yardOutTotal = 0
+    let yardInTotal = 0
+    let hcpOutTotal = 0
+    let hcpInTotal = 0
+    let parOutTotal = 0 
+    let parInTotal = 0
     
     let holesRow = '<tr><td>Hole</td>'
     let yardRow = '<tr><td>Yards</td>'
@@ -108,6 +94,7 @@ function addTeaboxYardage (course, teeBox, playerName) {
         const yards = courseTeeBoxes.yards
         const hcp = courseTeeBoxes.hcp
         const par = courseTeeBoxes.par
+ 
 
         console.log('hole '+ holeNum + ' yards ' + yards + ' hcp ' + hcp + ' par ' + par)
 
@@ -116,13 +103,21 @@ function addTeaboxYardage (course, teeBox, playerName) {
         hcpRow += `<td> ${hcp}</td>`
         parRow += `<td> ${par}</td>`
         playerRow += `<td> <input type="number" class="input" id="${holeNum}" onchange="onchangeScore(event, '${playerName}', ${holeNum})" min="1" max="10" size="2" maxLength="2"></td>`
-        
-        if(holeNum === 9) {
+        if(holeNum < 9){
+            yardOutTotal = yardOutTotal + yards
+            hcpOutTotal = hcpOutTotal + hcp
+            parOutTotal = parOutTotal + par
+        }else if(holeNum === 9) {
+            yardOutTotal = yardOutTotal + yards
+            hcpOutTotal = hcpOutTotal + hcp
+            parOutTotal = parOutTotal + par
+
             holesRow += '<td>Out</td></tr>'
-            yardRow += '<td></td></tr>'
-            hcpRow += '<td></td></tr>'
-            parRow += '<td></td></tr>'
+            yardRow += `<td>${yardOutTotal}</td></tr>`
+            hcpRow += `<td>${hcpOutTotal}</td></tr>`
+            parRow += `<td>${parOutTotal}</td></tr>`
             playerRow += `<td id="${playerName}outScore">0</td></tr>`
+
             scoreOut.innerHTML = holesRow + yardRow + hcpRow + parRow + playerRow
 
             holesRow = '<tr><td>Hole</td>'
@@ -130,28 +125,55 @@ function addTeaboxYardage (course, teeBox, playerName) {
             hcpRow = '<tr><td>HCP</td>'
             parRow = '<tr><td>Par</td>'
             playerRow = `<tr><td> ${playerName}</td>`
-        } else if(holeNum === 18) {
-            holesRow += '<td></td></tr>'
-            yardRow += '<td></td></tr>'
-            hcpRow += '<td></td></tr>'
-            parRow += '<td></td></tr>'
+        } else if(holeNum > 9 && holeNum != 18) {
+            yardInTotal = yardInTotal + yards
+            hcpInTotal = hcpInTotal + hcp
+            parInTotal = parInTotal + par
+        }else if(holeNum === 18){
+            yardInTotal = yardInTotal + yards
+            hcpInTotal = hcpInTotal + hcp
+            parInTotal = parInTotal + par
+
+            holesRow += '<td>In</td></tr>'
+            yardRow += `<td>${yardInTotal}</td></tr>`
+            hcpRow += `<td>${hcpInTotal}</td></tr>`
+            parRow += `<td>${parInTotal}</td></tr>`
             playerRow += `<td id="${playerName}inScore">0</td></tr>`
             // total = totalScore(playerName)
             totalScore += `<td id="${playerName}totalScore">0</td></tr>`
 
             scoreIn.innerHTML = holesRow + yardRow + hcpRow + parRow + playerRow + totalScore
         }
+    })   
+    displayGameOverButton()
+}
+
+function displayGameOverButton() {
+     //get display location for button
+     const scoreButton = document.querySelector('#scorecards')
+    //  let newinnerHTML = ''
+     scoreButton.innerHTML += `<buttonclass="form-control mt-3 " onclick="submitPlayerScores()">Submit Scores</button>`
+}
+
+function submitPlayerScores() {
+   
+    //get player names
+    //get their scores
+    players.forEach(player => {
+        const { name } = player
+        toastr["info"](name, "Thanks for Playing")
+
     })
 
-   
-    
+    // Display an info toast with no title
+
 }
 
 function onchangeScore(event, playerName, holeNum) {
     const inputScore = Number(event.target.value)
     //add score to players object
     const index = players.map(e => e.name).indexOf(playerName)
-    players[index].scores.splice(holeNum-1, 0, inputScore)
+    players[index].scores.splice(holeNum-1, 1, inputScore)
     totalScore(playerName)
 }
 
@@ -220,13 +242,9 @@ function handleAddNewUser() {
 
 function handleCourseSelection() {
     let courseId = document.querySelector('#course-select').value
-    console.log(courseId + ' this is the course ID')
-    // getTeeBoxes(val)
-    // displayTeeBoxes(courseId)
+    // console.log(courseId + ' this is the course ID')
+
     addUserInput() 
-
-
-    // displayScoreCard()
 }
 
 async function getAvailableCourses(course) {
