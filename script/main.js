@@ -11,9 +11,9 @@ let courses = []
 let players = []
 let total = 0
 
-let lehi = 'http://uxcobra.com/golfapi/course11819.txt'
-let aF = 'http://uxcobra.com/golfapi/course18300.txt'
-let spanish =  'http://uxcobra.com/golfapi/course19002.txt'
+let lehi = 'https://exquisite-pastelito-9d4dd1.netlify.app/golfapi/course11819.json'
+let aF = 'https://exquisite-pastelito-9d4dd1.netlify.app/golfapi/course18300.json'
+let spanish =  'https://exquisite-pastelito-9d4dd1.netlify.app/golfapi/course19002.json'
 
 function displayCourseSelection() {
     const  displayElement = document.querySelector('#course-select')
