@@ -152,7 +152,7 @@ function displayGameOverButton() {
      //get display location for button
      const scoreButton = document.querySelector('#scorecards')
     //  let newinnerHTML = ''
-     scoreButton.innerHTML += `<buttonclass="form-control mt-3 " onclick="submitPlayerScores()">Submit Scores</button>`
+     scoreButton.innerHTML += `<button class="form-control mt-3 " onclick="submitPlayerScores()">Submit Scores</button>`
 }
 
 function submitPlayerScores() {
@@ -260,7 +260,7 @@ function getAllCourses(course) {
     let responseJson = getAvailableCourses(course)
     responseJson.then((courseInfo) => {
         // console.log(courseInfo.data.id)
-        courses.push(courseInfo.data)
+        courses.push(courseInfo)
         displayCourseSelection()
     })
 }
